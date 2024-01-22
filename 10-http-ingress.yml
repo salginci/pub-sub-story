@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  annotations:
+    konghq.com/strip-path: "true"
+    kubernetes.io/ingress.class: kong 
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod 
+spec:
+  tls:
+  - secretName: my-ssl-cert-secret
+    hosts:
+    - yourdomain.com
+  rules:
+    - http:
+       paths:
+       - path: /
+         pathType: Prefix
+         backend:
+           service:
+             name: salginci-api
+             port:
+               number: 80
+       - path: /api/v1/contact
+         pathType: Prefix
+         backend:
+           service:
+             name: api-fe-support
+             port:
+               number: 80
+      host: yourdomain.com

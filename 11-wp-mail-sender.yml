@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: wp-mail-sender
+ labels:
+   app: wp-mail-sender
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: wp-mail-sender
+ template:
+   metadata:
+     labels:
+       app: wp-mail-sender
+   spec:
+     containers:
+       - name: wp-mail-sender
+         image: europe-west1-docker.pkg.dev/snappy-density-406712/apis-base/wp-mail-sender
+         imagePullPolicy: Always
+         env:
+          - name: smtp_username
+            valueFrom:
+             secretKeyRef:
+              name: smtp-info-secret
+              key: smtp_username
+          - name: smtp_password
+            valueFrom:
+             secretKeyRef:
+              name: smtp-info-secret
+              key: smtp_password
+          - name: PUBSUBTOPIC
+            valueFrom:
+             secretKeyRef:
+              name: mail-topic-secret
+              key: PUBSUBTOPIC
+          - name: PUBSUBTOPICSUBSCRIPTION
+            valueFrom:
+             secretKeyRef:
+              name: mail-topic-secret
+              key: PUBSUBTOPICSUBSCRIPTION
+          - name: SUBSCRIBER_KEY
+            value: /secrets/subkey.json
+         volumeMounts:
+          - name: service-account-secret
+            mountPath: /secrets
+            readOnly: true
+     volumes:
+       - name: service-account-secret
+         secret:
+          secretName: subscriber-sa-key
+
+

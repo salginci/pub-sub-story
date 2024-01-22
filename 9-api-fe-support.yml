@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: api-fe-support
+ labels:
+   app: api-fe-support
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: api-fe-support
+ template:
+   metadata:
+     labels:
+       app: api-fe-support
+   spec:
+     containers:
+       - name: api-fe-support
+         image: europe-west1-docker.pkg.dev/snappy-density-406712/apis-base/api-fe-support:latest
+         imagePullPolicy: Always
+         env:
+          - name: "PORT"
+            value: "8080"
+          - name: PUBSUBTOPIC
+            valueFrom:
+             secretKeyRef:
+              name: mail-topic-secret
+              key: PUBSUBTOPIC
+          - name: PUBLISHER_KEY
+            value: /secrets/key.json
+         volumeMounts:
+          - name: service-account-secret
+            mountPath: /secrets
+            readOnly: true
+     volumes:
+       - name: service-account-secret
+         secret:
+          secretName: publisher-sa-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-fe-support
+  labels:
+    app: api-fe-support
+    servicefor: backend
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: api-fe-support
