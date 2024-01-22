@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: salginci-api
+  labels:
+    app: salginci-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: salginci-api
+  template:
+    metadata:
+      labels:
+        app: salginci-api
+    spec:
+      containers:
+        - name: server
+          image: nginx:1.19-alpine
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+       
